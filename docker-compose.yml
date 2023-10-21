@@ -1,0 +1,67 @@
+version: '1'
+
+services:
+  web:
+    build: .
+    command: bash -c "python manage.py collectstatic --noinput && python manage.py makemigrations && python manage.py migrate && gunicorn notif_webhook_unifonic.wsgi:application --bind 0.0.0.0:8000"
+    container_name: notif_webhook_unifonic
+    volumes:
+      - .:/notif_webhook_unifonic
+      - static_volume:/notif_webhook_unifonic/static
+      - media_volume:/notif_webhook_unifonic/media
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: 5432
+    depends_on:
+      - db
+    networks:
+      - djangonetwork
+    env_file:
+      - .env
+    links:
+      - db:db
+  db:
+    image: postgres:latest
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - djangonetwork
+    env_file:
+      - .env
+    ports:
+      - '5432:5432'
+  nginx-certbot:
+    image: jonasal/nginx-certbot
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      CERTBOT_EMAIL: ${CERTBOT_EMAIL}
+    volumes:
+      - ./nginx/user.conf:/etc/nginx/user.conf
+      - letsencrypt:/etc/letsencrypt
+      - nginx_logs:/var/log/nginx
+    depends_on:
+      - web
+    env_file:
+      - .env
+networks:
+  djangonetwork:
+    driver: bridge
+volumes:
+  postgres_data:
+  static_volume:
+  media_volume:
+  letsencrypt:
+  nginx_logs:
