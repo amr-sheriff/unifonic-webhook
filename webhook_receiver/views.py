@@ -10,9 +10,10 @@ from rest_framework.authentication import SessionAuthentication, BasicAuthentica
 from rest_framework.permissions import IsAuthenticated, AllowAny
 import logging
 from slack_sdk import WebClient
+import os
 logger = logging.getLogger(__name__)
 
-slack = WebClient('xoxb-634695844210-5048356958931-CKfnuyssUUUQpl76ZkISgLZU')
+slack = WebClient(os.environ.get('SLACK_TOKEN'))
 
 
 @method_decorator(csrf_exempt, name='dispatch')

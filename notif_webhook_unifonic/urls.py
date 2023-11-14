@@ -25,5 +25,6 @@ urlpatterns = [
     path('login/', views.Login.as_view(), name='login'),
     path('admin/', admin.site.urls),
     path('webhook/', include('webhook_receiver.urls')),
+    path('_status/', views.status_view, name='status_view'),
     path('api-auth/', include('rest_framework.urls', namespace='rest_framework')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
