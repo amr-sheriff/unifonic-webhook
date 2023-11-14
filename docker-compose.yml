@@ -48,9 +48,10 @@ services:
       - "443:443"
     environment:
       CERTBOT_EMAIL: ${CERTBOT_EMAIL}
+#      STAGING: 1
     volumes:
-      - ./nginx/user.conf:/etc/nginx/user.conf
-      - letsencrypt:/etc/letsencrypt
+      - ./nginx/user_conf.d:/etc/nginx/user_conf.d:ro
+      - ./nginx_secrets:/etc/letsencrypt
       - nginx_logs:/var/log/nginx
     depends_on:
       - web
@@ -63,5 +64,5 @@ volumes:
   postgres_data:
   static_volume:
   media_volume:
-  letsencrypt:
+  nginx_secrets:
   nginx_logs:
